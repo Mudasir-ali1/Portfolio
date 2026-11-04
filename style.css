@@ -622,15 +622,6 @@ body {
     padding: 20px 32px;
   }
 
-  .hero-section {
-    padding: 120px 32px 40px;
-  }
-
-  .hero-services {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
   .brands-section {
     padding: 30px 32px;
   }
@@ -921,15 +912,16 @@ body {
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
   }
 
-  /* 4 numbered items as a 2x2 grid with equal columns so nothing is cut off */
+  /* 4 numbered items as a 2x2 grid with equal columns, stacked number & label */
   .hero-services {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 16px;
+    gap: 20px 16px;
+    width: 100%;
     margin-top: 24px;
     padding-top: 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgba(255, 255, 255, 0.12);
-    width: 100%;
     box-sizing: border-box;
     position: relative;
     z-index: 2;
@@ -937,28 +929,35 @@ body {
 
   .service-item {
     display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
     min-width: 0;
+    width: 100%;
+    overflow: visible;
   }
 
   .service-num {
     font-size: 12px;
     font-weight: 700;
+    line-height: 1.3;
     color: #ff5c8a;
     letter-spacing: 0.04em;
+    display: block;
     flex-shrink: 0;
   }
 
   .service-name {
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
+    line-height: 1.3;
     color: #ffffff;
     letter-spacing: -0.01em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: normal;
+    display: block;
   }
 
   .brands-section,
@@ -1827,15 +1826,6 @@ body {
 @media (max-width: 1024px) {
   .header {
     padding: 20px 32px;
-  }
-
-  .hero-section {
-    padding: 120px 32px 40px;
-  }
-
-  .hero-services {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
   }
 
   .brands-section {
