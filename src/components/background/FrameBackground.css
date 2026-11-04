@@ -31,3 +31,15 @@
   z-index: -1;
   background: linear-gradient(180deg, rgba(9, 5, 11, 0.45) 0%, transparent 25%, transparent 75%, rgba(9, 5, 11, 0.55) 100%);
 }
+
+/* Mobile dynamic readability overlay: darkens as user scrolls past hero */
+.fb-scroll-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: #09050b;
+  opacity: 0;
+  will-change: opacity;
+}
+

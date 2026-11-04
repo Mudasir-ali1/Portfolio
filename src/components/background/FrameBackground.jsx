@@ -11,6 +11,7 @@ function getFrameUrl(index) {
 
 export default function FrameBackground() {
   const canvasRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,9 +29,13 @@ export default function FrameBackground() {
     let needsRedraw = true;
     let animId = 0;
 
-    // Quality: Canvas sized to innerWidth/innerHeight x devicePixelRatio (cap 2.5)
+    // Quality: Canvas sized to innerWidth/innerHeight x devicePixelRatio (capped at 2.0 on mobile, 2.5 on desktop)
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const isMobile =
+        window.innerWidth <= 768 ||
+        (window.innerWidth / window.innerHeight < 1.0 && window.innerWidth <= 1024);
+      const maxDpr = isMobile ? 2.0 : 2.5;
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -66,7 +71,8 @@ export default function FrameBackground() {
       return bestIdx !== -1 ? images[bestIdx] : null;
     };
 
-    // Draw frame preserving aspect ratio (cover mode) with cropped source to hide Wink watermark
+    // Draw frame: on mobile uses custom top-anchored layout with face centering and bottom fade;
+    // on desktop uses cover-fit with watermark cropping.
     const drawFrame = (idx) => {
       const img = getLoadedImage(idx);
       if (!img || !img.naturalWidth) return false;
@@ -78,9 +84,60 @@ export default function FrameBackground() {
       const iw = img.naturalWidth;
       const ih = img.naturalHeight;
 
-      // Watermark in top-left corner: x in [39, 184] (2.03% - 9.58%), y in [28, 79] (2.59% - 7.31%).
-      // Crop source frame: sy = watermark bottom edge (7.31%) + ~1.5% margin (~8.9%).
-      // sx = 0 since the watermark is completely above sy across all x.
+      const isMobile =
+        window.innerWidth <= 768 ||
+        (window.innerWidth / window.innerHeight < 1.0 && window.innerWidth <= 1024);
+
+      if (isMobile) {
+        // 1. Fill entire canvas with dark background #09050b first
+        ctx.fillStyle = "#09050b";
+        ctx.fillRect(0, 0, cw, ch);
+
+        // 2. Scale frame so height is about 58% of canvas height, keeping aspect ratio
+        const scale = (ch * 0.58) / ih;
+        const dw = iw * scale;
+        const dh = ch * 0.58;
+
+        // 3. Center horizontally on face (around 51.5% of frame width)
+        const dx = cw / 2 - dw * 0.515;
+
+        // 4. Place near top, just below navbar: dy = ch * 0.07
+        const dy = ch * 0.07;
+
+        // 5. Draw full uncropped frame: face completely visible (both eyes, full head, shoulders)
+        ctx.drawImage(img, 0, 0, iw, ih, dx, dy, dw, dh);
+
+        // 6. Fade bottom edge of picture into dark background with vertical gradient
+        //    (transparent at about 45% canvas height to #09050b at about 66%)
+        const grad = ctx.createLinearGradient(0, ch * 0.45, 0, ch * 0.66);
+        grad.addColorStop(0, "rgba(9, 5, 11, 0)");
+        grad.addColorStop(1, "#09050b");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, ch * 0.45, cw, ch * 0.21);
+
+        // 7. Solid #09050b below 66% canvas height
+        ctx.fillStyle = "#09050b";
+        ctx.fillRect(0, ch * 0.66 - 1, cw, ch - ch * 0.66 + 2);
+
+        // 8. Soft side fades if photo does not span entire width (e.g. landscape mobile)
+        if (dx > 0) {
+          const leftGrad = ctx.createLinearGradient(dx, 0, dx + dw * 0.08, 0);
+          leftGrad.addColorStop(0, "#09050b");
+          leftGrad.addColorStop(1, "rgba(9, 5, 11, 0)");
+          ctx.fillStyle = leftGrad;
+          ctx.fillRect(dx - 1, dy, dw * 0.08 + 2, dh);
+
+          const rightGrad = ctx.createLinearGradient(dx + dw - dw * 0.08, 0, dx + dw, 0);
+          rightGrad.addColorStop(0, "rgba(9, 5, 11, 0)");
+          rightGrad.addColorStop(1, "#09050b");
+          ctx.fillStyle = rightGrad;
+          ctx.fillRect(dx + dw - dw * 0.08 - 1, dy, dw * 0.08 + 2, dh);
+        }
+
+        return true;
+      }
+
+      // DESKTOP: (screens > 768px): Exact existing cover-fit with top watermark crop
       const sx = 0;
       const sy = Math.round(ih * 0.089);
       const sw = iw;
@@ -100,12 +157,9 @@ export default function FrameBackground() {
         dh = ch;
         dw = ch * imageRatio;
         dx = (cw - dw) / 2;
-        // On portrait/tall screens, bias towards top-center to keep face prominent
         dy = (ch - dh) * 0.22;
       }
 
-      // Re-tuned vertical offset: baseline 5% downward push + 5.96% crop compensation = ~11% (0.11 * ch).
-      // Clamped to [ch - dh, 0] so there is strictly NO empty strip at the top or bottom on any screen width.
       dy += ch * 0.11;
       dy = Math.max(ch - dh, Math.min(0, dy));
 
@@ -164,8 +218,26 @@ export default function FrameBackground() {
       targetProgress = calculateProgress();
     };
 
+    // Dynamic readability overlay on mobile: smoothly darkens background as user scrolls past hero
+    const updateMobileOverlay = () => {
+      if (!overlayRef.current) return;
+      const isMobile =
+        window.innerWidth <= 768 ||
+        (window.innerWidth / window.innerHeight < 1.0 && window.innerWidth <= 1024);
+      if (isMobile) {
+        const scrollY = window.scrollY;
+        const maxScroll = window.innerHeight * 0.9;
+        const opacity = Math.min(0.7, Math.max(0, (scrollY / (maxScroll || 1)) * 0.7));
+        overlayRef.current.style.opacity = opacity.toFixed(3);
+      } else {
+        overlayRef.current.style.opacity = "0";
+      }
+    };
+
     // Animation Loop with lerp for silky smooth transitions
     const tick = () => {
+      updateMobileOverlay();
+
       currentProgress += (targetProgress - currentProgress) * 0.12;
 
       const frameIndex = Math.min(
@@ -245,6 +317,7 @@ export default function FrameBackground() {
     const onResize = () => {
       resizeCanvas();
       handleScroll();
+      updateMobileOverlay();
     };
 
     window.addEventListener("resize", onResize, { passive: true });
@@ -256,6 +329,7 @@ export default function FrameBackground() {
     }
 
     resizeCanvas();
+    updateMobileOverlay();
     targetProgress = calculateProgress();
     currentProgress = targetProgress;
     preloadAllFrames();
@@ -275,6 +349,7 @@ export default function FrameBackground() {
     <div className="fb-root" aria-hidden="true">
       <canvas ref={canvasRef} className="fb-canvas" />
       <div className="fb-shade" />
+      <div ref={overlayRef} className="fb-scroll-overlay" />
     </div>
   );
 }
