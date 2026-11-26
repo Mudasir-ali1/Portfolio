@@ -67,6 +67,7 @@
 }
 
 .sm-card {
+  position: relative;
   width: 100%;
   min-height: 44px;
   padding: 20px;
@@ -80,11 +81,25 @@
   overflow-wrap: break-word;
 }
 
+.sm-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .sm-num {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: #ff3b6b;
+}
+
+.sm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff3b6b;
+  opacity: 0.85;
 }
 
 .sm-card-title {
@@ -126,16 +141,19 @@
   color: #ff85a3;
 }
 
-/* Light CSS-only fade-up (0.4s, once) */
+/* Smooth staggered CSS-only reveal on scroll (once) */
 .sm-reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  transform: translateY(28px) scale(0.985);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
 .sm-reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -143,6 +161,6 @@
     opacity: 1;
     transform: none;
     transition: none;
+    will-change: auto;
   }
 }
-

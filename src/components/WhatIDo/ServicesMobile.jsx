@@ -39,7 +39,7 @@ export default function ServicesMobile() {
     const root = sectionRef.current;
     if (!root) return;
 
-    const items = root.querySelectorAll(".sm-reveal");
+    const items = Array.from(root.querySelectorAll(".sm-reveal"));
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (reduceMotion || typeof IntersectionObserver === "undefined") {
@@ -49,14 +49,17 @@ export default function ServicesMobile() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
+        const visibleBatch = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => items.indexOf(a.target) - items.indexOf(b.target));
+
+        visibleBatch.forEach((entry, idx) => {
+          entry.target.style.transitionDelay = `${idx * 110}ms`;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -24px 0px" }
+      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
     );
 
     items.forEach((el) => observer.observe(el));
@@ -80,7 +83,10 @@ export default function ServicesMobile() {
       <ul className="sm-list" aria-label="Services">
         {MOBILE_SERVICES.map((item) => (
           <li key={item.id} className="sm-card sm-reveal">
-            <span className="sm-num">{item.num}</span>
+            <div className="sm-card-top">
+              <span className="sm-num">{item.num}</span>
+              <span className="sm-dot" aria-hidden="true" />
+            </div>
             <h3 className="sm-card-title">{item.title}</h3>
             <p className="sm-card-desc">{item.desc}</p>
             <ul className="sm-tags" aria-label={`${item.title} technologies`}>
@@ -96,4 +102,3 @@ export default function ServicesMobile() {
     </section>
   );
 }
-
