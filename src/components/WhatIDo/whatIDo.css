@@ -17,7 +17,7 @@
   overflow: visible;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .wid {
     --nav-h: 60px;
   }
@@ -26,7 +26,7 @@
 /* ===== Pinned Container (Full-height relative container) ===== */
 .wid-pinned {
   position: relative;
-  height: calc(100dvh - var(--nav-h));
+  height: calc(100svh - var(--nav-h));
   width: 100%;
   overflow: hidden;
   margin: 0;
@@ -249,15 +249,115 @@
   color: rgba(245, 242, 238, 0.85);
 }
 
-/* ===== Responsive Mobile Styles (< 768px) ===== */
-@media (max-width: 768px) {
-  .wid-row1 {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding: 1.2rem 5vw 0.5rem;
+/* ===== Mobile Stack Layout (< 768px, 3D-capable device) ===== */
+.wid--mobile-stack {
+  /* Normal flow — no pin, no fixed height */
+  height: auto;
+  min-height: 0;
+  /* Prevent any horizontal bleed */
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding: 0 0 48px;
+}
+
+.wid--mobile-stack .wid-row1 {
+  /* Override absolute positioning — make it normal flow */
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 2rem 5vw 1.2rem;
+  pointer-events: auto;
+  will-change: auto;
+}
+
+/* Mobile vertical card list */
+.wid-mobile-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 5vw;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  /* No horizontal overflow */
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile card */
+.wid-mobile-card {
+  box-sizing: border-box;
+  /* Full-width card — no fixed px width that could overflow */
+  width: 100%;
+  /* At least 44px tap target height */
+  min-height: 44px;
+  padding: 18px 20px 20px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 61, 127, 0.5);
+  background: rgba(14, 10, 18, 0.72);
+  /* No backdrop-filter on mobile cards (perf) */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  /* No heavy box-shadow animation */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  color: #f5f2ee;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-align: left;
+}
+
+.wid-mobile-card .wid-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.wid-mobile-card .wid-meta span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--pink-soft, #ff5c8a);
+}
+
+.wid-mobile-card .wid-meta i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pink-soft, #ff5c8a);
+  /* Smaller glow — no animation */
+  box-shadow: 0 0 5px var(--pink, #ff2d6f);
+}
+
+.wid-mobile-card h3 {
+  margin: 0 0 6px 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: #ffffff;
+}
+
+.wid-mobile-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(245, 242, 238, 0.82);
+}
+
+/* On mobile, hide 3D-only decorative elements that bleed into the DOM */
+@media (max-width: 767px) {
+  /* Hide curved dotted path canvas overlay if accidentally rendered */
+  .wid-canvas,
+  .wid-vignette,
+  .wid-stage,
+  /* Hide any Three.js Html wrapper (ghost duplicate text) */
+  .wid-html {
+    display: none !important;
   }
 
+  /* Title size */
   .wid-title {
     font-size: clamp(1.6rem, 6.2vw, 2.4rem);
     line-height: 1.12;
@@ -268,27 +368,10 @@
     max-width: 100%;
   }
 
-  .wid-item {
-    width: min(280px, 80vw);
-    padding: 16px 18px 18px;
-    background: rgba(14, 10, 18, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .wid-item h3 {
-    font-size: 17px;
-    line-height: 1.25;
-  }
-
-  .wid-item p {
-    font-size: 13px;
-    line-height: 1.5;
-    color: rgba(245, 242, 238, 0.88);
-  }
-
-  .wid-item.is-active h3 {
-    font-size: 18px;
+  /* Prevent horizontal scroll on the whole section */
+  .wid {
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
 

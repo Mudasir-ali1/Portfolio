@@ -6,7 +6,7 @@ const END_ID = "services";
 
 function getFrameUrl(index) {
   const n = String(index + 1).padStart(3, "0");
-  return `/frames/ezgif-frame-${n}.jpg`;
+  return `/frames/ezgif-frame-${n}.webp`;
 }
 
 export default function FrameBackground() {

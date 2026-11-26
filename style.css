@@ -160,7 +160,7 @@ body {
 
 /* HERO SECTION */
 .hero-section {
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -805,8 +805,7 @@ body {
 
   /* HERO SECTION (Mobile: stacked below face, 2x2 grid, full-bleed smooth overlay) */
   .hero-section {
-    min-height: 100vh;
-    min-height: 100dvh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
