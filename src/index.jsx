@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import FrameBackground from './components/background/FrameBackground';
 import AboutMe from './components/about/AboutMe';
-import WhatIDo from './components/WhatIDo/WhatIDo';
+import ServicesSection from './components/WhatIDo/ServicesSection';
 import SkillsSection from './components/skills/SkillsSection';
 import OriginalsScroll from './components/projects/OriginalsScroll';
 import ExperienceTimeline from './components/experience/ExperienceTimeline';
@@ -31,11 +31,11 @@ if (aboutMountNode) {
   aboutRoot.render(<AboutMe />);
 }
 
-// Mount WhatIDo Section Island
+// Mount Services Section Island (ServicesMobile on <768px, WhatIDo on desktop)
 const mountNode = document.getElementById('services-root');
 if (mountNode) {
   const root = createRoot(mountNode);
-  root.render(<WhatIDo />);
+  root.render(<ServicesSection />);
 }
 
 // Mount Skills Section Island
